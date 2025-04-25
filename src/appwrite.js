@@ -14,8 +14,14 @@ const database = new Databases(client);
 
 export const updateSearchCount = async (searchTerm, movie) => {
     try {
+
+        if (!searchTerm || searchTerm.trim() === '') {
+            console.error('Invalid search term provided.');
+            return;
+        }
+
         const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
-            Query.equal('searchTerm', searchTerm)
+            Query.equal('searchTerm', searchTerm),
         ]);
 
         if (result.documents.length > 0) {
