@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect, use } from 'react'
 import Search from './components/Search'
 import Spinner from './components/Spinner'
 import MovieCard from './components/MovieCard'
+import { useDebounce } from 'react-use'
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -22,13 +21,25 @@ function App() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [movieList, setMovieList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
-  const fetchMovies = async () => {
+  // Debounce the search term to avoid excessive API calls
+  useDebounce(
+    () => {
+      setDebouncedSearchTerm(searchTerm);
+    },
+    900,
+    [searchTerm]
+  );
+
+  const fetchMovies = async (query='') => {
     setLoading(true);
     setErrorMessage(null);
 
     try {
-      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+      const endpoint = query
+        ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
+        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
       const response = await fetch(endpoint, API_OPTIONS);
 
       if (!response.ok) {
@@ -54,9 +65,9 @@ function App() {
   }
 
   useEffect(() => {
-    fetchMovies();
+    fetchMovies(debouncedSearchTerm);
   }
-    , []);
+    , [debouncedSearchTerm]);
 
   return (
     <main>
