@@ -63,7 +63,7 @@ function App() {
         await updateSearchCount(query, movie);
       }
 
-      updateSearchCount();
+      
     }
     catch (error) {
       console.error('Error fetching movies:', error);
